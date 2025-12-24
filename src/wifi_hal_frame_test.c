@@ -287,7 +287,11 @@ int test_data_from_pcap(frame_test_arg_t *arg)
 
 
     while ((sz = fread(&pkt_hdr, 1, sizeof(wireshark_pkthdr_t), fp)) == sizeof(wireshark_pkthdr_t)) {
-     memset(tmp, 0, 4096);
+     if (pkt_hdr.caplen == 0 || pkt_hdr.caplen > sizeof(tmp)) {
+        fclose(fp);
+        return RETURN_ERR;
+     }
+     memset(tmp, 0, sizeof(tmp));
      sz = fread(tmp, 1, pkt_hdr.caplen, fp);
      
      if (sz == pkt_hdr.caplen) {
