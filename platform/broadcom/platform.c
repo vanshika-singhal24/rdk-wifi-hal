@@ -303,10 +303,6 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
     wifi_hal_stats_dbg_print("%s:%d: Entered with radio_index = %u\n", __func__, __LINE__, radio_index);
     snprintf(file_path, sizeof(file_path), "/dev/shm/wifi_neighbor_ap_emu_%u", radio_index);
 
-    if (access(file_path, F_OK) != 0) {
-        return RETURN_OK;
-    }
-
     sem = sem_open(SEM_NAME, 0);
     if (sem == SEM_FAILED) {
         wifi_hal_stats_error_print("%s:%d: Semaphore does not exist, emulation likely disabled.\n",
@@ -336,6 +332,14 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
         return RETURN_ERR;
     }
 
+    if (neighbor_header.neighbor_count == 0 || neighbor_header.neighbor_count == UINT32_MAX) {
+        wifi_hal_stats_error_print("%s:%d: Invalid header data neighbor_count = %u\n", __func__, __LINE__, neighbor_header.neighbor_count);
+        fclose(fp);
+        sem_post(sem);
+        sem_close(sem);
+        return RETURN_ERR;
+    }
+
     combined_data = malloc(
         (existing_count + neighbor_header.neighbor_count) * sizeof(wifi_neighbor_ap2_t));
     if (combined_data == NULL) {
@@ -350,6 +354,7 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
     if (existing_count > 0 && *neighbor_ap_array != NULL) {
         memcpy(combined_data, *neighbor_ap_array, existing_count * sizeof(wifi_neighbor_ap2_t));
         free(*neighbor_ap_array);
+        *neighbor_ap_array = NULL;
     }
 
     if (fread(combined_data + existing_count, sizeof(wifi_neighbor_ap2_t),
