@@ -329,6 +329,7 @@ void init_hostap_bss(wifi_interface_info_t *interface)
 void init_oem_config(wifi_interface_info_t *interface)
 {
 #ifdef CONFIG_WPS
+    wifi_hal_info_print("%s:%d:Entry\n", __func__, __LINE__);
     struct hostapd_bss_config *conf;
     wifi_device_info_t device_info;
     conf = &interface->u.ap.conf;
@@ -365,6 +366,7 @@ void init_oem_config(wifi_interface_info_t *interface)
 #if !defined(PLATFORM_LINUX)
     conf->ap_vlan = interface->vlan;
 #endif
+    wifi_hal_info_print("%s:%d:Exit\n", __func__, __LINE__);
 #endif
 }
 

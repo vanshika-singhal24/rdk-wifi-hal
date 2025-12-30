@@ -4695,6 +4695,7 @@ static inline cJSON *json_open_interface_map(FILE *fp, size_t len)
 
 static inline int json_parse_interface_map(cJSON *json)
 {
+    wifi_hal_error_print("%s:%d: Entry\n", __func__, __LINE__);
     cJSON *phy_list;
     cJSON *phy_index;
     cJSON *phy_elm;
@@ -4950,6 +4951,7 @@ static inline int json_parse_interface_map(cJSON *json)
     l_radio_interface_map = tmp_radio_interface_map;
     l_radio_interface_map_size = radio_interface_map_size;
 
+    wifi_hal_error_print("%s:%d: Exit\n", __func__, __LINE__);
     return 0;
 }
 

@@ -258,6 +258,7 @@ bool is_ng_file(char *file_name)
 
 int test_data_from_pcap(frame_test_arg_t *arg)
 {
+    printf("%s:%d, Entry\n", __func__, __LINE__);
     FILE *fp;
     struct pcap_file_header  file_hdr;
     size_t sz;
@@ -315,11 +316,13 @@ int test_data_from_pcap(frame_test_arg_t *arg)
 
 
     fclose(fp);
+    printf("%s:%d, Exit\n", __func__, __LINE__);
     return RETURN_OK;
 }
 
 int test_data_from_pcapng(frame_test_arg_t *arg)
 {
+    printf("%s:%d, Entry\n", __func__, __LINE__);
     FILE *fp;
     section_header_block_t sblock;
     interface_description_block_t   iblock;
@@ -415,6 +418,7 @@ int test_data_from_pcapng(frame_test_arg_t *arg)
 
 
     fclose(fp);
+    printf("%s:%d, Exit\n", __func__, __LINE__);
       
     return RETURN_OK;
 }

@@ -293,6 +293,7 @@ static void set_wl_runtime_configs (const wifi_vap_info_map_t *vap_map)
 int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_array,
     uint *data_count)
 {
+    wifi_hal_stats_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
     FILE *fp;
     char file_path[64];
     sem_t *sem;
@@ -390,6 +391,7 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
 
     fclose(fp);
     sem_close(sem);
+    wifi_hal_stats_dbg_print("%s:%d: Exit\n", __func__, __LINE__);
     return RETURN_OK;
 }
 #endif // WIFI_EMULATOR_CHANGE

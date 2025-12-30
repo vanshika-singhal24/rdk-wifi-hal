@@ -6101,6 +6101,7 @@ void interface_free(wifi_interface_info_t *interface)
 
 int interface_info_handler(struct nl_msg *msg, void *arg)
 {
+    wifi_hal_dbg_print("%s:%d:Entry\n", __func__, __LINE__);
     //unsigned int radio_index;
     wifi_radio_info_t *radio = (wifi_radio_info_t *)arg;
     wifi_interface_info_t *interface = NULL;
@@ -6240,6 +6241,7 @@ int interface_info_handler(struct nl_msg *msg, void *arg)
         }
     }
 
+    wifi_hal_dbg_print("%s:%d:Exit\n", __func__, __LINE__);
     return NL_SKIP;
 }
 
