@@ -4846,6 +4846,14 @@ static inline int json_parse_interface_map(cJSON *json)
 
         return -1;
     }
+    if (interface_idx_map_size == 0 || radio_interface_map_size == 0) {
+        wifi_hal_error_print("%s:%d: No interfaces or radios present\n", __func__, __LINE__);
+
+        free(tmp_radio_interface_map);
+        free(tmp_intf_idx_map);
+
+        return -1;
+    }
 
     // filling occurs from the end
     i_idx = interface_idx_map_size - 1;

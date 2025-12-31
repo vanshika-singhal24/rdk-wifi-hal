@@ -306,10 +306,6 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
     wifi_hal_stats_dbg_print("%s:%d: Entered with radio_index = %u\n", __func__, __LINE__, radio_index);
     snprintf(file_path, sizeof(file_path), "/dev/shm/wifi_neighbor_ap_emu_%u", radio_index);
 
-    if (access(file_path, F_OK) != 0) {
-        return RETURN_OK;
-    }
-
     sem = sem_open(SEM_NAME, 0);
     if (sem == SEM_FAILED) {
         wifi_hal_stats_error_print("%s:%d: Semaphore does not exist, emulation likely disabled.\n",
@@ -339,8 +335,18 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
         return RETURN_ERR;
     }
 
+    if ((existing_count + neighbor_header.neighbor_count) * sizeof(wifi_neighbor_ap2_t) <= SIZE_MAX) {
+        wifi_hal_stats_error_print("%s:%d: Allocation size overflow\n", __func__, __LINE__);
+        fclose(fp);
+        sem_post(sem);
+        sem_close(sem);
+        return RETURN_ERR;
+    }
+
+    size_t neighbor_count = neighbor_header.neighbor_count;
+
     combined_data = malloc(
-        (existing_count + neighbor_header.neighbor_count) * sizeof(wifi_neighbor_ap2_t));
+        (existing_count + neighbor_count) * sizeof(wifi_neighbor_ap2_t));
     if (combined_data == NULL) {
         wifi_hal_stats_error_print("%s:%d: Memory allocation for combined_data failed\n", __func__,
             __LINE__);
@@ -356,7 +362,7 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
     }
 
     if (fread(combined_data + existing_count, sizeof(wifi_neighbor_ap2_t),
-            neighbor_header.neighbor_count, fp) != neighbor_header.neighbor_count) {
+            neighbor_count, fp) != neighbor_count) {
         wifi_hal_stats_error_print("%s:%d: Failed to read neighbor data:\n", __func__, __LINE__);
         free(combined_data);
         fclose(fp);
@@ -366,7 +372,7 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
     }
 
     *neighbor_ap_array = malloc(
-        (existing_count + neighbor_header.neighbor_count) * sizeof(wifi_neighbor_ap2_t));
+        (existing_count + neighbor_count) * sizeof(wifi_neighbor_ap2_t));
     if (*neighbor_ap_array == NULL) {
         wifi_hal_stats_error_print("%s:%d: Memory allocation for neighbor_ap_array failed\n", __func__,
             __LINE__);
@@ -378,8 +384,8 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
     }
 
     memcpy(*neighbor_ap_array, combined_data,
-        (existing_count + neighbor_header.neighbor_count) * sizeof(wifi_neighbor_ap2_t));
-    *data_count = existing_count + neighbor_header.neighbor_count;
+        (existing_count + neighbor_count) * sizeof(wifi_neighbor_ap2_t));
+    *data_count = existing_count + neighbor_count;
     free(combined_data);
 
     if (sem_post(sem) == -1) {
